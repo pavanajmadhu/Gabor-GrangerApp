@@ -56,7 +56,26 @@ for i in range(8):
 # ---------------------------
 # SAVE SETTINGS
 # ---------------------------
+CONFIG_SHEET_NAME = "Gabor Granger Config"
+
+@st.cache_resource
+def connect_to_config_sheet(sheet_name=CONFIG_SHEET_NAME):
+    try:
+        scopes = ["https://www.googleapis.com/auth/spreadsheets", "https://www.googleapis.com/auth/drive"]
+        creds = Credentials.from_service_account_info(
+            st.secrets["google"]["service_account"],
+            scopes=scopes
+        )
+        client = gspread.authorize(creds)
+        sheet = client.open(sheet_name).sheet1
+        return sheet
+    except Exception as e:
+        st.error(f"⚠️ Could not connect to config sheet: {e}")
+        return None
+
+config_sheet = connect_to_config_sheet()
 if st.button("💾 Save Settings"):
+    # --- Save locally to Streamlit session ---
     st.session_state['settings'] = {
         "product_name": product_name,
         "description": description,
@@ -67,8 +86,26 @@ if st.button("💾 Save Settings"):
         "max_rounds": max_rounds,
         "questions": questions
     }
-    st.success("✅ Settings saved! Respondents can now visit the 'Questionnaire' page.")
+    st.success("✅ Settings saved locally and to Google Sheets!")
 
+    # --- NEW PART: also save to Google Sheet for respondents ---
+    if config_sheet:
+        data = {
+            "product_name": product_name,
+            "description": description,
+            "price_list": json.dumps(price_list),
+            "inc_up": inc_up,
+            "dec_down": dec_down,
+            "random_start": random_start,
+            "max_rounds": max_rounds,
+            "questions": json.dumps(questions)
+        }
+
+        # Clear old config and add the new one
+        config_sheet.clear()
+        config_sheet.append_row(["Key", "Value"])
+        for k, v in data.items():
+            config_sheet.append_row([k, str(v)])
 # ---------------------------
 # ADMIN DASHBOARD
 # ---------------------------
