@@ -91,13 +91,10 @@ st.caption("An adaptive willingness-to-pay questionnaire")
 # RESPONDENT FLOW (with pre-questions + improved Gabor logic)
 # ---------------------------
 
-PRE_QUESTIONS = [
-    "Do you currently use similar products?",
-    "Would you recommend this product to others?",
-    "Do you care about eco-friendly packaging?",
-    "Do you check price before quality while buying?",
-    "Would you switch brands if offered better price?"
-]
+PRE_QUESTIONS = settings.get('pre_questions', [])
+if not PRE_QUESTIONS:
+    st.warning("⚠️ No pre-questions found in settings. Please add them in the Admin page.")
+    st.stop()
 
 if 'session_id' not in st.session_state:
     st.session_state.session_id = None
