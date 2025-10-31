@@ -16,7 +16,7 @@ st.set_page_config(page_title="Questionnaire — Gabor-Granger", layout="centere
 def connect_to_gsheet(sheet_name="GaborGrangerResponses"):
     scopes = ["https://www.googleapis.com/auth/spreadsheets"]
     creds = Credentials.from_service_account_info(
-        json.loads(st.secrets["google"]["service_account"]),
+        dict(st.secrets["google"]["service_account"]),
         scopes=scopes
     )
     client = gspread.authorize(creds)
