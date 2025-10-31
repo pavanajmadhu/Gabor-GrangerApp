@@ -32,15 +32,19 @@ sheet = connect_to_gsheet()
 # ADAPTIVE PRICE LOGIC
 # ---------------------------
 def adaptive_next_price(seq, inc_up, dec_down):
-    if len(seq) < 2:
+    """
+    Fixed-step Gabor-Granger logic:
+    - 'Yes' → increase price by inc_up
+    - 'No' → decrease price by dec_down
+    """
+    if not seq:
         return None
+
     last_price, last_answer = seq[-1]
-    prev_price, prev_answer = seq[-2]
-    if prev_answer == "Yes" and last_answer == "No":
-        return round((prev_price + last_price) / 2, 2)
-    if prev_answer == "No" and last_answer == "Yes":
-        return round((prev_price + last_price) / 2, 2)
-    return round(last_price + inc_up, 2) if last_answer == "Yes" else round(max(0, last_price - dec_down), 2)
+    if last_answer == "Yes":
+        return round(last_price + inc_up, 2)
+    else:
+        return round(max(0, last_price - dec_down), 2)
 
 # ---------------------------
 # LOAD SETTINGS
