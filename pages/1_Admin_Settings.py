@@ -13,7 +13,7 @@ st.caption("Configure and monitor your Gabor-Granger survey")
 # GOOGLE SHEETS CONNECTION
 # ---------------------------
 @st.cache_resource
-def connect_to_gsheet(sheet_name="GaborGrangerResponses"):
+def connect_to_gsheet(sheet_name="Gabor Granger Results"):
     try:
         scopes = ["https://www.googleapis.com/auth/spreadsheets", "https://www.googleapis.com/auth/spreadsheets.readonly"]
         creds = Credentials.from_service_account_info(
