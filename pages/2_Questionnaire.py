@@ -92,11 +92,9 @@ st.caption("An adaptive willingness-to-pay questionnaire")
 # ---------------------------
 
 PRE_QUESTIONS = [
-    "Do you currently use similar products?",
-    "Would you recommend this product to others?",
-    "Do you care about eco-friendly packaging?",
-    "Do you check price before quality while buying?",
-    "Would you switch brands if offered better price?"
+    "DO YOU EVALUATE THE IMPORTANCE OF THE PRODUCT TO YOU BEFORE PURCHASING IT?",
+    "DO YOU MAKE PURCHASES TO MAKE YOURSELF FEEL REWARDED?"
+    
 ]
 
 if 'session_id' not in st.session_state:
