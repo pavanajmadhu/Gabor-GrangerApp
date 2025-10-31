@@ -91,7 +91,7 @@ st.caption("An adaptive willingness-to-pay questionnaire")
 # RESPONDENT FLOW (with pre-questions + improved Gabor logic)
 # ---------------------------
 
-PRE_QUESTIONS = settings.get('questions', [])
+PRE_QUESTIONS = settings.get('pre_questions', [])
 if not PRE_QUESTIONS:
     st.warning("⚠️ No pre-questions found in settings. Please add them in the Admin page.")
     st.stop()
