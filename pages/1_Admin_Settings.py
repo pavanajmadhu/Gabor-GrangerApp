@@ -61,22 +61,11 @@ max_rounds = st.number_input("Max price questions per respondent", 1, 10, 5)
 # ---------------------------
 # PRELIMINARY QUESTIONS (UP TO 5)
 # ---------------------------
-st.subheader("🧠 Pre-Questions (up to 5)")
-pre_questions = []
-for i in range(5):
-    q = st.text_input(f"Pre-Question {i+1}", f"Example: Do you currently use similar products?")
-    if q.strip():
-        pre_questions.append(q)
-
-# ---------------------------
-# GABOR-GRANGER QUESTIONS (UP TO 8)
-# ---------------------------
-st.subheader("💰 Price-based Questions (up to 8)")
+st.subheader("📝 Survey Questions (up to 8)")
 questions = []
 for i in range(8):
     q = st.text_input(f"Question {i+1}", f"Would you buy {product_name} at ₹{{price}}?")
     questions.append(q)
-
 # ---------------------------
 # SAVE SETTINGS
 # ---------------------------
@@ -107,8 +96,7 @@ if st.button("💾 Save Settings"):
         "dec_down": dec_down,
         "random_start": random_start,
         "max_rounds": max_rounds,
-        "questions": questions,
-        "pre_questions": pre_questions
+        "questions": questions
     }
     st.success("✅ Settings saved! Respondents can now visit the 'Questionnaire' page.")
     # --- NEW PART: also save to Google Sheet for respondents ---
