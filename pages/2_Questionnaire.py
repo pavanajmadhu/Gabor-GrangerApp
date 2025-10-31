@@ -50,9 +50,36 @@ def adaptive_next_price(seq, inc_up, dec_down):
 # LOAD SETTINGS
 # ---------------------------
 settings = st.session_state.get('settings')
+def fetch_settings_from_sheet():
+    try:
+        scopes = ["https://www.googleapis.com/auth/spreadsheets", "https://www.googleapis.com/auth/drive"]
+        creds = Credentials.from_service_account_info(
+            st.secrets["google"]["service_account"],
+            scopes=scopes
+        )
+        client = gspread.authorize(creds)
+        sheet = client.open("Gabor Granger Config").sheet1
+        records = sheet.get_all_records()
+        if not records:
+            return None
+        config = {r["Key"]: r["Value"] for r in records}
+        config["price_list"] = json.loads(config["price_list"])
+        config["questions"] = json.loads(config["questions"])
+        config["inc_up"] = float(config["inc_up"])
+        config["dec_down"] = float(config["dec_down"])
+        config["random_start"] = config["random_start"].lower() == "true"
+        config["max_rounds"] = int(config["max_rounds"])
+        return config
+    except Exception as e:
+        st.error(f"⚠️ Could not fetch settings: {e}")
+        return None
+
+settings = st.session_state.get('settings')
 if not settings:
-    st.warning("⚠️ No survey configuration found. Please ask the admin to set it up first.")
-    st.stop()
+    settings = fetch_settings_from_sheet()
+    if not settings:
+        st.warning("⚠️ No survey configuration found. Please ask the admin to set it up first.")
+        st.stop()
 
 st.title(f"{settings['product_name']} — Pricing Survey")
 st.caption("An adaptive willingness-to-pay questionnaire")
