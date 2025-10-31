@@ -56,23 +56,75 @@ st.caption("An adaptive willingness-to-pay questionnaire")
 # ---------------------------
 # INITIALIZE SESSION
 # ---------------------------
+# ---------------------------
+# RESPONDENT FLOW (with pre-questions + improved Gabor logic)
+# ---------------------------
+
+PRE_QUESTIONS = [
+    "Do you currently use similar products?",
+    "Would you recommend this product to others?",
+    "Do you care about eco-friendly packaging?",
+    "Do you check price before quality while buying?",
+    "Would you switch brands if offered better price?"
+]
+
 if 'session_id' not in st.session_state:
-    st.session_state.session_id = str(uuid.uuid4())
-    st.session_state.q_index = 0
+    st.session_state.session_id = None
+    st.session_state.stage = "pre"   # stages: pre → gabor → done
+    st.session_state.pre_answers = {}
+    st.session_state.pre_index = 0
     st.session_state.sequence = []
+    st.session_state.timestamps = []
     st.session_state.rounds = 0
+    st.session_state.current_price = None
     st.session_state.completed = False
-    st.session_state.current_price = (
-        random.choice(settings['price_list']) if settings['random_start']
-        else settings['price_list'][0]
-    )
 
 # ---------------------------
-# QUESTION FLOW
+# START BUTTON
 # ---------------------------
-if not st.session_state.completed:
-    question_text = settings['questions'][st.session_state.q_index].format(price=st.session_state.current_price)
-    st.markdown(f"### {question_text}")
+if not st.session_state.session_id:
+    if st.button("Start Questionnaire"):
+        st.session_state.session_id = str(uuid.uuid4())
+        st.session_state.stage = "pre"
+        st.session_state.pre_answers = {}
+        st.session_state.pre_index = 0
+        rerun_app()
+
+# ---------------------------
+# STAGE 1 — PRELIMINARY QUESTIONS
+# ---------------------------
+elif st.session_state.stage == "pre":
+    q_index = st.session_state.pre_index
+    if q_index < len(PRE_QUESTIONS):
+        question = PRE_QUESTIONS[q_index]
+        st.subheader(f"Question {q_index + 1} of {len(PRE_QUESTIONS)}")
+        st.markdown(f"### {question}")
+        col1, col2 = st.columns(2)
+        yes = col1.button("✅ Yes")
+        no = col2.button("❌ No")
+
+        if yes or no:
+            st.session_state.pre_answers[question] = "Yes" if yes else "No"
+            st.session_state.pre_index += 1
+            rerun_app()
+    else:
+        # Move to Gabor stage
+        st.session_state.stage = "gabor"
+        if settings['random_start']:
+            st.session_state.current_price = random.choice(settings['price_list'])
+        else:
+            st.session_state.current_price = settings['price_list'][0]
+        rerun_app()
+
+# ---------------------------
+# STAGE 2 — GABOR-GRANGER TEST (from 2nd code)
+# ---------------------------
+elif st.session_state.stage == "gabor" and not st.session_state.completed:
+    st.subheader(settings['product_name'])
+    st.write(settings['description'])
+
+    price = st.session_state.current_price
+    st.markdown(f"### Would you buy this product at **₹{price:.2f}** ?")
 
     col1, col2 = st.columns(2)
     yes = col1.button("✅ Yes, I would buy")
@@ -80,50 +132,58 @@ if not st.session_state.completed:
 
     if yes or no:
         answer = "Yes" if yes else "No"
-        st.session_state.sequence.append((st.session_state.current_price, answer))
+        st.session_state.sequence.append((price, answer))
+        st.session_state.timestamps.append(datetime.utcnow().isoformat())
         st.session_state.rounds += 1
 
-        # Move to next question or adapt price
+        # Stop if max rounds reached
         if st.session_state.rounds >= settings['max_rounds']:
-            st.session_state.q_index += 1
-            st.session_state.rounds = 0
-            st.session_state.sequence = []
-
-            if st.session_state.q_index >= len(settings['questions']):
-                st.session_state.completed = True
-            else:
-                st.session_state.current_price = (
-                    random.choice(settings['price_list'])
-                    if settings['random_start']
-                    else settings['price_list'][0]
-                )
+            st.session_state.completed = True
+            st.session_state.stage = "done"
         else:
             next_price = adaptive_next_price(
                 st.session_state.sequence,
                 settings['inc_up'],
                 settings['dec_down']
             )
-            st.session_state.current_price = next_price or st.session_state.current_price
-        st.rerun()
+            if next_price:
+                st.session_state.current_price = next_price
+            else:
+                st.session_state.current_price = (
+                    price + settings['inc_up']
+                    if answer == "Yes"
+                    else max(0, price - settings['dec_down'])
+                )
+        rerun_app()
 
-else:
-    st.success("✅ Thank you! Your responses have been recorded.")
+# ---------------------------
+# STAGE 3 — SUBMIT RESULTS
+# ---------------------------
+elif st.session_state.stage == "done":
+    st.success("✅ Thank you! Your responses are recorded.")
+    seq = st.session_state.sequence
+    timestamps = st.session_state.timestamps
+
+    yes_prices = [p for p, a in seq if a == "Yes"]
+    final_price = max(yes_prices) if yes_prices else min([p for p, _ in seq])
+
     record = {
         "Respondent_ID": st.session_state.session_id,
-        "Timestamp": datetime.utcnow().isoformat(),
+        "Timestamp_Final": datetime.utcnow().isoformat(),
         "Product_Name": settings['product_name'],
-        "Questions": json.dumps(settings['questions']),
-        "Responses": json.dumps(st.session_state.sequence)
+        "Pre_Questions_JSON": json.dumps(st.session_state.pre_answers),
+        "Sequence_JSON": json.dumps(seq),
+        "Timestamps_JSON": json.dumps(timestamps),
+        "Final_Price": final_price,
+        "Total_Rounds": st.session_state.rounds
     }
 
-    try:
-        sheet.append_row(list(record.values()), value_input_option="USER_ENTERED")
-        st.balloons()
-        st.json(record)
-    except Exception as e:
-        st.error(f"Failed to save to Google Sheets: {e}")
+    write_to_sheet(record)
+    st.write("**Your final estimated willingness-to-pay price:** ₹", final_price)
+    st.json(record)
 
-    if st.button("Start a new respondent"):
-        for key in list(st.session_state.keys()):
-            del st.session_state[key]
-        st.rerun()
+    if st.button("Start new respondent"):
+        for key in ['session_id', 'stage', 'pre_answers', 'pre_index', 'sequence',
+                    'timestamps', 'rounds', 'current_price', 'completed']:
+            st.session_state.pop(key, None)
+        rerun_app()
