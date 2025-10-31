@@ -5,6 +5,17 @@ from google.oauth2.service_account import Credentials
 import pandas as pd
 
 st.set_page_config(page_title="Admin Settings — Gabor-Granger", layout="centered")
+# ---------------------------
+# SIMPLE PASSWORD PROTECTION
+# ---------------------------
+ADMIN_PASSWORD = st.secrets["admin"]["password"]  # stored securely in Streamlit secrets
+
+st.title("🔒 Admin Login")
+password_input = st.text_input("Enter admin password", type="password")
+
+if password_input != ADMIN_PASSWORD:
+    st.warning("Enter the correct password to access admin settings.")
+    st.stop()
 
 st.title("⚙️ Admin Settings")
 st.caption("Configure and monitor your Gabor-Granger survey")
