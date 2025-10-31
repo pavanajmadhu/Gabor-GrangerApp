@@ -23,7 +23,9 @@ def connect_to_gsheet(sheet_name="Gabor Granger Results"):
         client = gspread.authorize(creds)
         sheet = client.open(sheet_name).sheet1
         return sheet
-
+    except Exception as e:
+        st.error(f"⚠️ Could not connect to Google Sheets: {e}")
+        return None
 sheet = connect_to_gsheet()
 
 # ---------------------------
