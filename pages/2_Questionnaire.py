@@ -88,7 +88,7 @@ if not st.session_state.session_id:
         st.session_state.stage = "pre"
         st.session_state.pre_answers = {}
         st.session_state.pre_index = 0
-        rerun_app()
+        st.rerun()
 
 # ---------------------------
 # STAGE 1 — PRELIMINARY QUESTIONS
@@ -106,7 +106,7 @@ elif st.session_state.stage == "pre":
         if yes or no:
             st.session_state.pre_answers[question] = "Yes" if yes else "No"
             st.session_state.pre_index += 1
-            rerun_app()
+            st.rerun()
     else:
         # Move to Gabor stage
         st.session_state.stage = "gabor"
@@ -114,7 +114,7 @@ elif st.session_state.stage == "pre":
             st.session_state.current_price = random.choice(settings['price_list'])
         else:
             st.session_state.current_price = settings['price_list'][0]
-        rerun_app()
+        st.rerun()
 
 # ---------------------------
 # STAGE 2 — GABOR-GRANGER TEST (from 2nd code)
@@ -154,7 +154,7 @@ elif st.session_state.stage == "gabor" and not st.session_state.completed:
                     if answer == "Yes"
                     else max(0, price - settings['dec_down'])
                 )
-        rerun_app()
+        st.rerun()
 
 # ---------------------------
 # STAGE 3 — SUBMIT RESULTS
