@@ -186,4 +186,4 @@ elif st.session_state.stage == "done":
         for key in ['session_id', 'stage', 'pre_answers', 'pre_index', 'sequence',
                     'timestamps', 'rounds', 'current_price', 'completed']:
             st.session_state.pop(key, None)
-        rerun_app()
+        st.rerun()
