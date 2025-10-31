@@ -15,7 +15,7 @@ st.caption("Configure and monitor your Gabor-Granger survey")
 @st.cache_resource
 def connect_to_gsheet(sheet_name="GaborGrangerResponses"):
     try:
-        scopes = ["https://www.googleapis.com/auth/spreadsheets"]
+        scopes = ["https://www.googleapis.com/auth/spreadsheets", "https://www.googleapis.com/auth/spreadsheets.readonly"]
         creds = Credentials.from_service_account_info(
             st.secrets["google"]["service_account"],
             scopes=scopes
