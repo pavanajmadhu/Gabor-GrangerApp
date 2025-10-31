@@ -13,15 +13,16 @@ st.set_page_config(page_title="Questionnaire — Gabor-Granger", layout="centere
 # CONNECT TO GOOGLE SHEET
 # ---------------------------
 @st.cache_resource
-def connect_to_gsheet(sheet_name="GaborGrangerResponses"):
-    scopes = ["https://www.googleapis.com/auth/spreadsheets"]
-    creds = Credentials.from_service_account_info(
-        dict(st.secrets["google"]["service_account"]),
-        scopes=scopes
-    )
-    client = gspread.authorize(creds)
-    sheet = client.open(sheet_name).sheet1
-    return sheet
+def connect_to_gsheet(sheet_name="Gabor Granger Results"):
+    try:
+        scopes = ["https://www.googleapis.com/auth/spreadsheets", "https://www.googleapis.com/auth/drive"]
+        creds = Credentials.from_service_account_info(
+            st.secrets["google"]["service_account"],
+            scopes=scopes
+        )
+        client = gspread.authorize(creds)
+        sheet = client.open(sheet_name).sheet1
+        return sheet
 
 sheet = connect_to_gsheet()
 
