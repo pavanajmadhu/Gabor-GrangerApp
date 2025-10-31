@@ -178,7 +178,8 @@ elif st.session_state.stage == "done":
         "Total_Rounds": st.session_state.rounds
     }
 
-    write_to_sheet(record)
+    sheet.append_row(list(record.values()), value_input_option="USER_ENTERED")
+    st.balloons()
     st.write("**Your final estimated willingness-to-pay price:** ₹", final_price)
     st.json(record)
 
