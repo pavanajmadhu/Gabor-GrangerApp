@@ -17,7 +17,7 @@ def connect_to_gsheet(sheet_name="GaborGrangerResponses"):
     try:
         scopes = ["https://www.googleapis.com/auth/spreadsheets"]
         creds = Credentials.from_service_account_info(
-            dict(st.secrets["google"]["service_account"]),
+            st.secrets["google"]["service_account"],
             scopes=scopes
         )
         client = gspread.authorize(creds)
