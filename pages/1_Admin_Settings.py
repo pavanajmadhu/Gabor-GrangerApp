@@ -58,9 +58,9 @@ max_rounds = st.number_input("Max price questions per respondent", 1, 10, 5)
 # ---------------------------
 # MULTIPLE QUESTIONS (UP TO 8)
 # ---------------------------
-st.subheader("📝 Survey Questions (up to 8)")
+st.subheader("📝 Survey Questions (up to 5)")
 questions = []
-for i in range(8):
+for i in range(5):
     q = st.text_input(f"Question {i+1}", f"Would you buy {product_name} at ₹{{price}}?")
     questions.append(q)
 
