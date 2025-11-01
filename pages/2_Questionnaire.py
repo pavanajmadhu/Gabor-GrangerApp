@@ -82,7 +82,7 @@ if not settings:
         st.stop()
 
 st.title(f"{settings['product_name']} — Pricing Survey")
-st.caption("The questions given below are a simple Yes or No questions.The first two questions are to test the consumer psychology and the subsequent questions follaw a Gabor-Granger Model. Read the product description Carefeully and answer.\n If your Answer is Yes then you will be taken the the higher price point and\n for no you will be taken to a lower price point.\n After the the third round we will arrive at the final price of the product that you are willing to pay.")
+st.caption("The questions given below are a simple Yes or No questions.The first two questions are to test the consumer psychology and the subsequent questions follow a Gabor-Granger Model. Read the product description Carefeully and answer.\n If your Answer is Yes then you will be taken the the higher price point and\n for no you will be taken to a lower price point.\n After the the third round we will arrive at the final price of the product that you are willing to pay.")
 
 # ---------------------------
 # INITIALIZE SESSION
